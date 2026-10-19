@@ -2,15 +2,27 @@ const mineflayer = require('mineflayer');
 
 function createBot() {
     const bot = mineflayer.createBot({
-        host: 'shadowmcs.duckdns.org', // Buraya MagmaNode IP'sinin sadece yazı kısmını yaz (Örn: ://magmanode.com)
-        port: 25922,                // Buraya MagmaNode paneline verilen 5 haneli port numarasını yaz
+        host: 'SUNUCU_IP_ADRESINIZ', // MagmaNode IP'sinin sadece yazı kısmı
+        port: 25565,                // MagmaNode port numaranız
         username: 'MagmaBot_724',   // Botun oyundaki adı
-        version: '1.20.4'           // Sunucunun Minecraft sürümü neyse onu yaz (Örn: 1.20.1, 1.16.5 vb.)
+        version: '1.20.1'           // Sunucunuzun Minecraft sürümü
     });
 
+    // --- AUTHME OTOMATİK GİRİŞ AYARI ---
+    const botSifresi = "MagmaBot1234"; // Bot için zor bir şifre belirle
+
     bot.on('spawn', () => {
-        console.log('Bot MagmaNode sunucusuna basariyla girdi!');
-        // Botun AFK kalıp atılmaması için her 60 saniyede bir zıplamasını sağlar
+        console.log('Bot sunucuya girdi, sifre giriliyor...');
+        
+        // Botun sunucuya ilk defa kayıt olması için (İlk girişte bir kere çalışır)
+        bot.chat(`/register ${botSifresi} ${botSifresi}`);
+        
+        // Sonraki girişlerinde otomatik giriş yapması için
+        setTimeout(() => {
+            bot.chat(`/login ${botSifresi}`);
+        }, 1500); // Sunucuya tam yerleşmesi için 1.5 saniye bekler
+
+        // AFK kalıp atılmaması için her 60 saniyede bir zıplama koruması
         setInterval(() => {
             bot.setControlState('jump', true);
             setTimeout(() => bot.setControlState('jump', false), 500);
