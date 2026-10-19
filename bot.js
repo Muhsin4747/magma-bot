@@ -1,28 +1,39 @@
 const mineflayer = require('mineflayer');
+const http = require('http'); // Render'ı kandırmak için gerekli kütüphane
 
+// --- 1. RENDER ZAMAN AŞIMINI ENGELLEMEK İÇİN SAHTE WEB SERVER ---
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Bot aktif ve 7/24 calisiyor!\n');
+});
+
+// Render otomatik olarak PORT adında bir değişken verir, yoksa varsayılan 10000'i kullanır
+const PORT = process.env.PORT || 10000;
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Sahte web sunucusu ${PORT} portunda baslatildi. Render artik botu kapatmayacak!`);
+});
+
+// --- 2. MINEFLAYER BOT KODLARI ---
 function createBot() {
     const bot = mineflayer.createBot({
-        host: 'SUNUCU_IP_ADRESINIZ', // MagmaNode IP'sinin sadece yazı kısmı
-        port: 25565,                // MagmaNode port numaranız
-        username: 'MagmaBot_724',   // Botun oyundaki adı
-        version: '1.20.1'           // Sunucunuzun Minecraft sürümü
+        host: 'shadowmcs.duckdns.org',      // Buraya MagmaNode IP adresini yaz
+        port: 25922,             // Buraya MagmaNode port numaranı yaz
+        username: 'MagmaBot_724',// Botun oyundaki adı
+        version: '1.20.4'        // Sunucunun Minecraft sürümü
     });
 
-    // --- AUTHME OTOMATİK GİRİŞ AYARI ---
-    const botSifresi = "MagmaBot1234"; // Bot için zor bir şifre belirle
+    const botSifresi = "MagmaBot1234"; // AuthMe şifren
 
     bot.on('spawn', () => {
-        console.log('Bot sunucuya girdi, sifre giriliyor...');
+        console.log('Bot MagmaNode sunucusuna basariyla girdi!');
         
-        // Botun sunucuya ilk defa kayıt olması için (İlk girişte bir kere çalışır)
+        // AuthMe otomatik kayıt ve giriş komutları
         bot.chat(`/register ${botSifresi} ${botSifresi}`);
-        
-        // Sonraki girişlerinde otomatik giriş yapması için
         setTimeout(() => {
             bot.chat(`/login ${botSifresi}`);
-        }, 1500); // Sunucuya tam yerleşmesi için 1.5 saniye bekler
+        }, 1500);
 
-        // AFK kalıp atılmaması için her 60 saniyede bir zıplama koruması
+        // AFK kalıp atılmaması için 60 saniyede bir zıplama
         setInterval(() => {
             bot.setControlState('jump', true);
             setTimeout(() => bot.setControlState('jump', false), 500);
@@ -36,4 +47,5 @@ function createBot() {
     
     bot.on('error', (err) => console.log('Hata olustu: ', err));
 }
+
 createBot();
